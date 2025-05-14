@@ -1,26 +1,26 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped, mapped_column
+from flask import request, jsonify
 
-# Base declarativa para os modelos
+
 class Base(DeclarativeBase):
-    pass
+  pass
 
-# Instanciando o SQLAlchemy com a base personalizada
 db = SQLAlchemy(model_class=Base)
 
-# Inicializando o Flask
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
 db.init_app(app)
 
-# Modelo User
+# Model - 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str]
 
-# Modelo Book
 class Book(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     author: Mapped[str]
@@ -28,28 +28,16 @@ class Book(db.Model):
     year: Mapped[int]
     title: Mapped[str]
 
-# Criando as tabelas do banco
+# Criação da tabela no banco
 with app.app_context():
     db.create_all()
 
-# Rota simples
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-# Rota teste
-@app.route("/teste")
-def rota_teste():
-    return "<p>Rota, teste!</p>"
-
-# --------------------- ROTAS DO CRUD ------------------------
-
-# Adicionar um livro (CREATE)
+# POST
 @app.route("/books", methods=["POST"])
 def add_book():
     data = request.get_json()
     new_book = Book(
-        author=data["author"],
+        author=data["author"], 
         genre=data["genre"],
         year=data["year"],
         title=data["title"]
@@ -58,7 +46,6 @@ def add_book():
     db.session.commit()
     return jsonify({"message": "Livro adicionado com sucesso!"}), 201
 
-# Listar todos os livros (READ - todos)
 @app.route("/books", methods=["GET"])
 def get_books():
     books = Book.query.all()
@@ -73,7 +60,6 @@ def get_books():
     ]
     return jsonify(result)
 
-# Buscar um livro por ID (READ - um)
 @app.route("/books/<int:book_id>", methods=["GET"])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -85,7 +71,6 @@ def get_book(book_id):
         "title": book.title
     })
 
-# Atualizar um livro (UPDATE)
 @app.route("/books/<int:book_id>", methods=["PUT"])
 def update_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -99,10 +84,17 @@ def update_book(book_id):
     db.session.commit()
     return jsonify({"message": "Livro atualizado com sucesso!"})
 
-# Deletar um livro (DELETE)
 @app.route("/books/<int:book_id>", methods=["DELETE"])
 def delete_book(book_id):
     book = Book.query.get_or_404(book_id)
     db.session.delete(book)
     db.session.commit()
     return jsonify({"message": "Livro removido com sucesso!"})
+
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
+@app.route("/teste")
+def rota_teste():
+    return "<p>Rota, teste!</p>"

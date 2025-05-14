@@ -1,2 +1,2 @@
 Flask
-flask_sqlalchemy #ORM que estabelece conexão com o banco
+flask_sqlalchemy
